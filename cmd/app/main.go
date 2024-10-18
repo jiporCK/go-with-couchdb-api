@@ -17,6 +17,6 @@ func main() {
 
 	router := routes.InitRoutes(productController)
 
-	router.Run(":8080")
+	router.Run(":8081")
 }
 
