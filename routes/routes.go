@@ -30,5 +30,4 @@ func InitRoutes(controller *controller.ProductController) *gin.Engine {
 	}
 
 	return r
-
 }

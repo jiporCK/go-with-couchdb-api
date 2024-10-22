@@ -26,7 +26,7 @@ func (c *ProductController) CreateProduct(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create product"})
 		return
 	}
-	ctx.JSON(http.StatusCreated, gin.H{"message": "Course created successfully"})
+	ctx.JSON(http.StatusCreated, gin.H{"message": "Product created successfully"})
 }
 
 func (c *ProductController) GetAllProducts(ctx *gin.Context) {
@@ -83,7 +83,6 @@ func (c *ProductController) DeleteProductById(ctx *gin.Context) {
     }
 	c.service.DeleteProductById(id, existingProduct.Rev)
 	ctx.JSON(204, gin.H{"message": "Product deleted successfully"})
-
 }
 
 func (c *ProductController) BulkCreateProducts(ctx *gin.Context) {

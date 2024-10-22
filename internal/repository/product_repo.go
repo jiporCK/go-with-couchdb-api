@@ -8,16 +8,13 @@ import (
 
 	"github.com/go-kivik/kivik/v3"
 	"github.com/google/uuid"
+	"fmt"
 )
 
 type ProductRepo struct{}
 
 func (c *ProductRepo) CreateProduct(product entity.Product) error {
 	db := database.GetDB("products")
-
-	if product.ID == "" {
-		product.ID = uuid.New().String()
-	}
 
 	_, err := db.Put(context.TODO(), product.ID, product)
 	if err != nil {
@@ -86,14 +83,18 @@ func (c *ProductRepo) UpdateProductById(id string, rev string, updatedProduct en
 		return nil
 	}
 
+	if updatedProduct.Rev != existingProduct.Rev {
+		log.Println("Document revision mismatch. Please try again")
+		return fmt.Errorf("revision mismatch: expected %s, got %s", existingProduct.Rev, updatedProduct.Rev)
+	}
+
 	existingProduct.Name = updatedProduct.Name
 	existingProduct.Price = updatedProduct.Price
 
-	existingProduct.Rev = rev
 
 	_, err := db.Put(context.TODO(), id, existingProduct)
 	if err != nil {
-		log.Panicln("Failed to update product: ", err)
+		log.Println("Failed to update product: ", err)
 		return nil
 	}
 	return nil
@@ -150,7 +151,4 @@ func (c *ProductRepo) BulkUpdateProducts(products []entity.Product) error {
 
 	return nil
 }
-
-
-
 
