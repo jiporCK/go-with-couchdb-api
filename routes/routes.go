@@ -17,7 +17,7 @@ func InitRoutes(controller *controller.ProductController) *gin.Engine {
 		log.Fatalf("Could not set trusted proxies: %v", err)
 	}
 
-	productRouter := r.Group("/products") 
+	productRouter := r.Group("/products")
 	{
 		productRouter.POST("", controller.CreateProduct)
 		productRouter.GET("", controller.GetAllProducts)
