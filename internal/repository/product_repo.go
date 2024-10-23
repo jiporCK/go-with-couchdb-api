@@ -13,17 +13,21 @@ import (
 
 type ProductRepo struct{}
 
-func (c *ProductRepo) CreateProduct(product entity.Product) error {
-	db := database.GetDB("products")
-
-	_, err := db.Put(context.TODO(), product.ID, product)
-	if err != nil {
-		log.Println("Failed to create course: ", err)
-		return err
+func (r *ProductRepo) CreateProduct(product entity.Product) error {
+    db := database.GetDB("products")
+	
+	if product.ID == "" {
+		product.ID = uuid.New().String()
 	}
 
-	return nil
+    _, err := db.Put(context.TODO(), product.ID, product)
+    if err != nil {
+		log.Printf("Database error: %v\n", err)
+		return err
+	}	
+    return nil
 }
+
 
 func (c *ProductRepo) GetAllProducts() ([]entity.Product, error) {
 	db := database.GetDB("products")
@@ -72,7 +76,7 @@ func (c *ProductRepo) UpdateProductById(id string, rev string, updatedProduct en
 
 	row := db.Get(context.TODO(), id)
 	if row.Err != nil {
-        log.Println("Failed to retrieve course: ", row.Err)
+        log.Println("Failed to retrieve product: ", row.Err)
         return nil
     }
 

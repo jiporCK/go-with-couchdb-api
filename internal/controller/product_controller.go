@@ -6,14 +6,19 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type ProductController struct {
 	service *usecase.ProductService
+	validate *validator.Validate
 }
 
 func NewProductController(s *usecase.ProductService) *ProductController {
-	return &ProductController{service: s}
+	return &ProductController{
+		service: s,
+		validate: validator.New(),
+	}
 }
 
 func (c *ProductController) CreateProduct(ctx *gin.Context) {

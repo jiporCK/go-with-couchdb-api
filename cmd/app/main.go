@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+	
 	database.InitDB()
 
 	productRepo := &repository.ProductRepo{}
