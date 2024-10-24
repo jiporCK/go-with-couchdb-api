@@ -27,6 +27,22 @@ func (c *ProductController) CreateProduct(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	if err := c.validate.Struct(product); err != nil {
+		validationErrors := err.(validator.ValidationErrors)
+		errorMessages := make(map[string]string)
+
+		for _, fieldError := range validationErrors {
+			errorMessages[fieldError.Field()] = fieldError.Error()
+		}
+
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "Validation failed",
+			"details": errorMessages,
+		})
+		return
+	}
+
 	if err := c.service.CreateProduct(product); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create product"})
 		return
@@ -69,6 +85,22 @@ func (c *ProductController) UpdateProductById(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error: ": "Invalid input"})
 		return
 	}
+
+	if err := c.validate.Struct(product); err != nil {
+		validationErrors := err.(validator.ValidationErrors)
+		errorMessages := make(map[string]string)
+
+		for _, fieldError := range validationErrors {
+			errorMessages[fieldError.Field()] = fieldError.Error()
+		}
+
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "Validation failed",
+			"details": errorMessages,
+		})
+		return
+	}
+
 	updateProduct := c.service.UpdateProductById(id, product.Rev, updatedProduct)
 	if updateProduct != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update product"})
