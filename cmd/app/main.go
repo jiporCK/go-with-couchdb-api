@@ -10,14 +10,18 @@ import (
 
 func main() {
 	
+	// Initialize CouchDB database connection
 	database.InitDB()
 
+	// Inject dependencies for product module
 	productRepo := &repository.ProductRepo{}
 	productService := usecase.NewProductService(productRepo)
 	productController := controller.NewProductController(productService)
 
+	// Initialize routes and pass the ProductController
 	router := routes.InitRoutes(productController)
 
+	// Start server on port 8081
 	router.Run(":8081")
 }
 

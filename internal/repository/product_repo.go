@@ -28,7 +28,6 @@ func (r *ProductRepo) CreateProduct(product entity.Product) error {
     return nil
 }
 
-
 func (c *ProductRepo) GetAllProducts() ([]entity.Product, error) {
 	db := database.GetDB("products")
 
@@ -155,4 +154,3 @@ func (c *ProductRepo) BulkUpdateProducts(products []entity.Product) error {
 
 	return nil
 }
-
