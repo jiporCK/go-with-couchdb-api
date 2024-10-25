@@ -22,7 +22,7 @@ func (r *ProductRepo) CreateProduct(product entity.Product) error {
 
     _, err := db.Put(context.TODO(), product.ID, product)
     if err != nil {
-		log.Printf("Database error: %v\n", err)
+		log.Println("Database error: ", err)
 		return err
 	}	
     return nil

@@ -12,12 +12,19 @@ import (
 var Client *kivik.Client
 
 func InitDB() {
+
+	// creates a new client object to connect to CouchDB
 	client, err := kivik.New("couch", "http://admin:password@localhost:5984/")
+
 	if err != nil {
 		log.Fatal("Filed to connnect to CouchDB: ", err)
 	}
+
 	fmt.Println("Database connected succesfully")
+
+	// Assign the client to the global variable
 	Client = client
+
 }
 
 func GetDB(databaseName string) *kivik.DB {
