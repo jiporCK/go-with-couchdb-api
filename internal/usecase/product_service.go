@@ -17,7 +17,6 @@ func (s *ProductService) CreateProduct(product entity.Product) error {
     return s.repo.CreateProduct(product)
 }
 
-
 func (s *ProductService) GetAllProducts() ([]entity.Product, error) {
 	return s.repo.GetAllProducts()
 }

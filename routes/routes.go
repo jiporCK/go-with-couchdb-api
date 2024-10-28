@@ -28,6 +28,7 @@ func InitRoutes(controller *controller.ProductController) *gin.Engine {
 		productRouter.PUT("/:_id", controller.UpdateProductById)
 		productRouter.DELETE("/:_id", controller.DeleteProductById)
 
+		// For bulk create and update
 		productRouter.POST("/bulk-create", controller.BulkCreateProducts)
 		productRouter.PUT("/bulk-update", controller.BulkUpdateProducts)
 	}
