@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	_ "github.com/go-kivik/couchdb/v3" // Import the CouchDB driver
 	"github.com/go-kivik/kivik/v3"
@@ -13,59 +14,90 @@ import (
 // Client holds the CouchDB client connection (exported)
 var Client *kivik.Client
 
+// Config holds the configuration for the CouchDB connection
+type Config struct {
+	Host     string
+	Username string
+	Password string
+	Database string
+}
+
 // InitDB initializes the CouchDB client and creates the database if it doesn’t exist
 func InitDB() error {
-	// Use environment variables for configuration
-	host := os.Getenv("COUCHDB_HOST")
-	if host == "" {
-		host = "202.178.125.77:5984" // Just the host and port, no protocol
-	}
-	user := os.Getenv("COUCHDB_USER")
-	if user == "" {
-		user = "admin"
-	}
-	pass := os.Getenv("COUCHDB_PASSWORD")
-	if pass == "" {
-		pass = "adminpw"
-	}
-	dbName := os.Getenv("COUCHDB_DATABASE")
-	if dbName == "" {
-		dbName = "ishopdb"
+	// Load configuration from environment variables
+	cfg, err := loadConfig()
+	if err != nil {
+		log.Printf("Failed to load CouchDB configuration: %v", err)
+		return fmt.Errorf("failed to load CouchDB configuration: %w", err)
 	}
 
 	// Create connection string
-	connString := fmt.Sprintf("http://%s:%s@%s", user, pass, host)
+	connString := fmt.Sprintf("http://%s:%s@%s", cfg.Username, cfg.Password, cfg.Host)
 
-	// Initialize client
-	var err error
-	Client, err = kivik.New("couch", connString)
-	if err != nil {
-		log.Printf("Failed to connect to CouchDB: %v", err)
-		return fmt.Errorf("failed to connect to CouchDB: %w", err)
+	// Initialize client with retry logic
+	const maxRetries = 5
+	const retryDelay = 2 * time.Second
+	for retries := maxRetries; retries > 0; retries-- {
+		Client, err = kivik.New("couch", connString)
+		if err == nil {
+			break
+		}
+		log.Printf("Failed to connect to CouchDB (attempt %d/%d): %v", maxRetries-retries+1, maxRetries, err)
+		if retries == 1 { // Last retry
+			log.Printf("Exhausted retries connecting to CouchDB")
+			return fmt.Errorf("failed to connect to CouchDB after %d attempts: %w", maxRetries, err)
+		}
+		time.Sleep(retryDelay)
 	}
 
-	fmt.Println("Database connected successfully")
+	log.Println("Database connected successfully")
 
 	// Ensure the database exists
 	ctx := context.Background()
-	err = Client.CreateDB(ctx, dbName)
+	err = Client.CreateDB(ctx, cfg.Database)
 	if err != nil {
 		// Check if the error is due to the database already existing (HTTP 412)
 		if kivik.StatusCode(err) == 412 { // Precondition Failed (database exists)
-			log.Printf("Database %s already exists, proceeding...", dbName)
+			log.Printf("Database %s already exists, proceeding...", cfg.Database)
 		} else {
-			log.Printf("Failed to create database %s: %v", dbName, err)
-			return fmt.Errorf("failed to create database %s: %w", dbName, err)
+			log.Printf("Failed to create database %s: %v", cfg.Database, err)
+			return fmt.Errorf("failed to create database %s: %w", cfg.Database, err)
 		}
 	}
 
 	// Initialize views
-	if err := initializeViews(Client.DB(ctx, dbName)); err != nil {
+	if err := initializeViews(Client.DB(ctx, cfg.Database)); err != nil {
 		log.Printf("Failed to initialize views: %v", err)
 		return fmt.Errorf("failed to initialize views: %w", err)
 	}
 
 	return nil
+}
+
+// loadConfig loads the CouchDB configuration from environment variables
+func loadConfig() (Config, error) {
+	cfg := Config{
+		Host:     os.Getenv("COUCHDB_HOST"),
+		Username: os.Getenv("COUCHDB_USER"),
+		Password: os.Getenv("COUCHDB_PASSWORD"),
+		Database: os.Getenv("COUCHDB_DATABASE"),
+	}
+
+	// Validate required environment variables
+	if cfg.Host == "" {
+		return Config{}, fmt.Errorf("COUCHDB_HOST environment variable is required")
+	}
+	if cfg.Username == "" {
+		return Config{}, fmt.Errorf("COUCHDB_USER environment variable is required")
+	}
+	if cfg.Password == "" {
+		return Config{}, fmt.Errorf("COUCHDB_PASSWORD environment variable is required")
+	}
+	if cfg.Database == "" {
+		return Config{}, fmt.Errorf("COUCHDB_DATABASE environment variable is required")
+	}
+
+	return cfg, nil
 }
 
 // GetDB returns a handle to the specified database
@@ -103,5 +135,6 @@ func initializeViews(db *kivik.DB) error {
 		}
 		return fmt.Errorf("failed to create view: %w", err)
 	}
+	log.Println("Successfully created view _design/products")
 	return nil
 }
