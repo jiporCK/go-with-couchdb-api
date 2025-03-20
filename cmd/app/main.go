@@ -24,4 +24,3 @@ func main() {
 	// Start server on port 8081
 	router.Run(":8081")
 }
-

@@ -1,0 +1,27 @@
+services:
+  go-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: go-api  # Local image name, not pushed to Docker Hub
+    container_name: go-api
+    restart: always
+    ports:
+      - "8081:8081"  # Map host port 8081 to container port 8081
+    environment:
+      - GIN_MODE=release  # Run GIN in release mode for production
+      - COUCHDB_URL=${COUCHDB_URL}
+      - COUCHDB_USER=${COUCHDB_USER}
+      - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
+      - COUCHDB_DATABASE=${COUCHDB_DATABASE}
+    networks:
+      - couchdb-network
+    # Uncomment the volumes below if using HTTPS with Let’s Encrypt certificates
+    # volumes:
+    #   - /etc/letsencrypt/live/api.yourdomain.com/fullchain.pem:/app/certs/cert.pem:ro
+    #   - /etc/letsencrypt/live/api.yourdomain.com/privkey.pem:/app/certs/key.pem:ro
+    command: ["/root/go-api"]  # Use the full path to the binary
+
+networks:
+  couchdb-network:
+    driver: bridge
