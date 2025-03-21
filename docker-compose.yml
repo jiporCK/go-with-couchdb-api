@@ -10,10 +10,11 @@ services:
       - "8081:8081"  # Map host port 8081 to container port 8081
     environment:
       - GIN_MODE=release  # Run GIN in release mode for production
+      - COUCHDB_HOST=${COUCHDB_HOST}
       - COUCHDB_URL=${COUCHDB_URL}
       - COUCHDB_USER=${COUCHDB_USER}
       - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
-      - COUCHDB_DATABASE=${COUCHDB_DATABASE}
+      - COUCHDB_DATABASE=${COUCHDB_DATABASE} 
     networks:
       - couchdb-network
     # Uncomment the volumes below if using HTTPS with Let’s Encrypt certificates

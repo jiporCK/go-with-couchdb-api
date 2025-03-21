@@ -20,6 +20,7 @@ type Config struct {
 	Username string
 	Password string
 	Database string
+	Port string
 }
 
 // InitDB initializes the CouchDB client and creates the database if it doesn’t exist
@@ -32,7 +33,7 @@ func InitDB() error {
 	}
 
 	// Create connection string
-	connString := fmt.Sprintf("http://%s:%s@%s", cfg.Username, cfg.Password, cfg.Host)
+	connString := fmt.Sprintf("http://%s:%s@%s:%s", cfg.Username, cfg.Password, cfg.Host, cfg.Port)
 
 	// Initialize client with retry logic
 	const maxRetries = 5
@@ -78,6 +79,7 @@ func InitDB() error {
 func loadConfig() (Config, error) {
 	cfg := Config{
 		Host:     os.Getenv("COUCHDB_HOST"),
+		Port:     os.Getenv("COUCHDB_PORT"), // Include port
 		Username: os.Getenv("COUCHDB_USER"),
 		Password: os.Getenv("COUCHDB_PASSWORD"),
 		Database: os.Getenv("COUCHDB_DATABASE"),
@@ -86,6 +88,9 @@ func loadConfig() (Config, error) {
 	// Validate required environment variables
 	if cfg.Host == "" {
 		return Config{}, fmt.Errorf("COUCHDB_HOST environment variable is required")
+	}
+	if cfg.Port == "" {
+		return Config{}, fmt.Errorf("COUCHDB_PORT environment variable is required")
 	}
 	if cfg.Username == "" {
 		return Config{}, fmt.Errorf("COUCHDB_USER environment variable is required")
@@ -99,6 +104,7 @@ func loadConfig() (Config, error) {
 
 	return cfg, nil
 }
+
 
 // GetDB returns a handle to the specified database
 func GetDB(databaseName string) *kivik.DB {

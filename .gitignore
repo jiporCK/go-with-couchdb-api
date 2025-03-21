@@ -1,1 +1,43 @@
+# Binaries and build artifacts
+/bin/
+/build/
+*.exe
+*.out
+*.o
+
+# Go-specific ignores
+/go.sum
+/go.work
+/go.work.sum
+/go-build/
+
+# Dependency directories (if any)
+vendor/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+*.swo
+*.bak
+.DS_Store
+
+# IDE and Editor-specific files
+.vscode/
+.idea/
+*.iml
+
+# Docker-related ignores
+docker-compose.override.yml
 .env
+.envrc
+
+# Justfile cache (if applicable)
+.justfile.swp
+
+# Shell script outputs
+*.sh~
+*.bak
+
+# Git ignored for autopush.sh (if it contains sensitive credentials)
+autopush.sh
